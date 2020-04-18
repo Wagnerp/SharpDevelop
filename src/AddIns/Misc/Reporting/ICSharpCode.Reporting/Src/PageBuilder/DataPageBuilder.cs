@@ -36,22 +36,19 @@ namespace ICSharpCode.Reporting.PageBuilder
 	/// Description of DataPageBuilder.
 	/// </summary>
 	
-	public class DataPageBuilder:BasePageBuilder
-	{
-		
-		
-		public DataPageBuilder(IReportModel reportModel,IEnumerable list):base(reportModel)
-		{
+	public class DataPageBuilder:BasePageBuilder{
+	
+		public DataPageBuilder(IReportModel reportModel,IEnumerable list):base(reportModel){
 			List = list;
 		}
 		
 		
-		public override void BuildExportList()
-		{
+		public override void BuildExportList(){
 			CreateDataSource();
 			SetupExpressionRunner(ReportModel.ReportSettings,DataSource);
 			base.BuildExportList();
 			BuildDetail();
+			ExpressionRunner.Visitor.SetCurrentDataSource(DataSource.CurrentList);
 			BuildReportFooter();
 			AddPage(CurrentPage);
 			UpdatePageInfo();
@@ -63,8 +60,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		}
 		
 		
-		void BuildDetail()
-		{
+		void BuildDetail(){
 			CurrentSection = ReportModel.DetailSection;
 			if(DataSourceContainsData()) {
 				CurrentLocation = DetailStart;
@@ -77,6 +73,26 @@ namespace ICSharpCode.Reporting.PageBuilder
 			}
 		}
 
+		/*
+		void NewMethod(IContainerConverter converter, ref Point pagePosition, ref Point sectionPosition, IGrouping<object, object> grouping, ExportContainer sectionContainer)
+		{
+			foreach (var child in grouping) {
+				var dataItems = ExtractDataItems(CurrentSection.Items);
+				List<IExportColumn> convertedItems = FillAndConvert(sectionContainer, child, dataItems, converter);
+				AdjustLocationInSection(sectionPosition, convertedItems);
+				sectionContainer.ExportedItems.AddRange(convertedItems);
+				MeasureAndArrangeContainer(sectionContainer);
+				if (PageFull(sectionContainer)) {
+					PerformPageBreak();
+					InsertContainer(sectionContainer);
+					pagePosition = DetailStart;
+					sectionContainer.Location = DetailStart;
+				}
+				sectionPosition = new Point(CurrentSection.Location.X, sectionPosition.Y + convertedItems[0].DisplayRectangle.Size.Height + 5);
+				sectionContainer.Size = new Size(sectionContainer.Size.Width, sectionContainer.Size.Height + convertedItems[0].Size.Height);
+			}
+		}
+*/
 
 		void BuildGroupedDetails (IContainerConverter converter,Point startPosition) {
 			var pagePosition = startPosition;
@@ -84,14 +100,17 @@ namespace ICSharpCode.Reporting.PageBuilder
 			
 			foreach (IGrouping<object, object> grouping in DataSource.GroupedList) {
 				
-				var groupHeader = (BaseRowItem)CurrentSection.Items.Where(p => p.GetType() == typeof(GroupHeader)).FirstOrDefault();
-				var sectionContainer = CreateContainerForSection(CurrentPage, pagePosition);
+//				var groupHeader = (BaseRowItem)CurrentSection.Items.Where(p => p.GetType() == typeof(GroupHeader)).FirstOrDefault();
+				var groupHeader = (BaseRowItem)CurrentSection
+					.Items.
+					FirstOrDefault(p => p.GetType() == typeof(GroupHeader));
 				
+				var sectionContainer = CreateContainerForSection(CurrentPage, pagePosition);
 				DataSource.Fill(groupHeader.Items,grouping.FirstOrDefault());
 				
 				var headerRow = converter.ConvertToExportContainer(groupHeader);
-				
-				headerRow.Location = new Point(headerRow.Location.X,groupHeader.Location.Y);
+				headerRow.Location = groupHeader.Location;
+
 				
 				var headerItems = converter.CreateConvertedList(groupHeader.Items);
 				converter.SetParent(sectionContainer, headerItems);
@@ -110,8 +129,14 @@ namespace ICSharpCode.Reporting.PageBuilder
 				
 				//Childs
 				foreach (var child in grouping) {
-					var dataItems = CurrentSection.Items.Where(p => p.GetType() == typeof(BaseDataItem)).ToList();
-					List<IExportColumn> convertedItems = FillAndConvert(sectionContainer, child, dataItems, converter);
+					var dataItems = ExtractDataItems(CurrentSection.Items);
+
+					var convertedItems = FillAndConvert(sectionContainer, child, dataItems, converter)
+						.OrderBy(p => p.Location.X).ToList();
+					
+					var xx = convertedItems.FirstOrDefault().Location;
+					
+					Console.WriteLine(xx);
 					
 					AdjustLocationInSection(sectionPosition,  convertedItems);
 					
@@ -135,8 +160,24 @@ namespace ICSharpCode.Reporting.PageBuilder
 		}
 
 		
-		void EvaluateExpressionsInGroups(ExportContainer sectionContainer, IGrouping<object, object> grouping)
-		{
+		List<IPrintableObject> ExtractDataItems (List<IPrintableObject> list) {
+			List<IPrintableObject> items = null;
+			foreach (var element in list) {
+				var gh = element as GroupHeader;
+				if (gh == null) {
+					var container = element as ReportContainer;
+					if (container == null) {
+						items = list.Where(p => p.GetType() == typeof(BaseDataItem)).ToList();
+					} else {
+						items = container.Items.Where(p => p.GetType() == typeof(BaseDataItem)).ToList();
+					}
+				}
+			}
+			return items;
+		}
+			
+		 
+		void EvaluateExpressionsInGroups(ExportContainer sectionContainer, IGrouping<object, object> grouping){
 			ExpressionRunner.Visitor.SetCurrentDataSource(grouping);
 			ExpressionRunner.Visitor.Visit(sectionContainer);
 		}
@@ -208,11 +249,15 @@ namespace ICSharpCode.Reporting.PageBuilder
 		}
 		
 		
-		static void AdjustLocationInSection(Point sectionPosition,List<IExportColumn> convertedItems)
-		{
-			foreach (var element in convertedItems) {
-				element.Location = new Point(element.Location.X, sectionPosition.Y);
-			}
+		static void AdjustLocationInSection(Point sectionPosition,List<IExportColumn> convertedItems){
+			
+			convertedItems.ForEach(element => {element.Location = new Point(element.Location.X,sectionPosition.Y); });
+			                       	
+			                      
+//			foreach (var element in convertedItems) {
+////				element.Location = new Point(element.Location.X + sectionPosition.X , sectionPosition.Y);
+//				element.Location = new Point(element.Location.X , sectionPosition.Y);
+//			}
 		}
 		
 		
@@ -230,8 +275,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		}
 		
 		
-		void InsertContainer(ExportContainer sectionContainer)
-		{
+		void InsertContainer(ExportContainer sectionContainer){
 			if (Pages.Count == 0) {
 				CurrentPage.ExportedItems.Insert(2, sectionContainer);
 			} else {

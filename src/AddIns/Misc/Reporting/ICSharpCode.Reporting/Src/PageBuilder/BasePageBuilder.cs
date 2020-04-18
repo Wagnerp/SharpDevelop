@@ -56,7 +56,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		void BuildReportHeader(){
 			if (Pages.Count == 0) {
 				var header = CreateSection(ReportModel.ReportHeader,CurrentLocation);
-				var r = new Rectangle(header.Location.X, header.Location.Y, header.Size.Width, header.Size.Height);
+				var r = new Rectangle(header.Location.X, header.Location.Y, header.Size.Width, header.DesiredSize.Height);
 				CurrentLocation = new Point (ReportModel.ReportSettings.LeftMargin,r.Bottom + 1);
 				AddSectionToPage(header);
 			}
@@ -75,6 +75,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		void BuildPageHeader(){
 			var pageHeader = CreateSection(ReportModel.PageHeader,CurrentLocation);
 			DetailStart = new Point(ReportModel.ReportSettings.LeftMargin,pageHeader.Location.Y + pageHeader.DesiredSize.Height +1);
+//			var xx = pageHeader.ExportedItems.Where(x => x.Name.Contains("xy")).ToList();
 			AddSectionToPage(pageHeader);
 		}
 		
@@ -90,15 +91,8 @@ namespace ICSharpCode.Reporting.PageBuilder
 		}
 		
 		
-		void AddSectionToPage(IExportContainer header){
-			header.Parent = CurrentPage;
-			CurrentPage.ExportedItems.Add(header);
-		}
-		
-		
-		
-		
 		protected void BuildReportFooter(){
+		
 			var lastSection = CurrentPage.ExportedItems.Last();
 			CurrentLocation = new Point(ReportModel.ReportSettings.LeftMargin,
 			                            lastSection.Location.Y - ReportModel.ReportFooter.Size.Height - 2);
@@ -115,6 +109,11 @@ namespace ICSharpCode.Reporting.PageBuilder
 			BuildPageFooter();
 		}
 		
+			void AddSectionToPage(IExportContainer header){
+			header.Parent = CurrentPage;
+			CurrentPage.ExportedItems.Add(header);
+		}
+		
 		
 		protected bool PageFull(IExportContainer container) {
 			return container.DisplayRectangle.Bottom > DetailEnds.Y;
@@ -123,7 +122,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		#endregion
 		
 		protected IExportContainer CreateSection(IReportContainer container,Point location){
-			var sea = new SectionEventArgs(container);
+			var sea = new SectionEventArgs(container,Pages.Count);
 			Raise<SectionEventArgs> (SectionRendering,this,sea);
 			var containerConverter = new ContainerConverter(location);
 			var convertedContainer = containerConverter.ConvertToExportContainer(container);
@@ -131,8 +130,10 @@ namespace ICSharpCode.Reporting.PageBuilder
 			var list = containerConverter.CreateConvertedList(container.Items);
 			
 			containerConverter.SetParent(convertedContainer,list);
-			convertedContainer.ExportedItems.AddRange(list);
 			
+			convertedContainer.ExportedItems.AddRange(list);
+			//Run ExpressionEvaluator for every section, otherwise measure don't work 
+			ExpressionRunner.Visitor.Visit(convertedContainer as ExportContainer);
 			convertedContainer.DesiredSize = MeasureElement(convertedContainer);
 			ArrangeContainer(convertedContainer);
 			return convertedContainer;
@@ -190,7 +191,9 @@ namespace ICSharpCode.Reporting.PageBuilder
 			CurrentLocation = DetailStart;
 		}
 		
-		
+		protected void SortIstByLocationY () {
+			
+		}
 		protected void UpdatePageInfo() {
 			foreach (var page in Pages) {
 				page.PageInfo.TotalPages = Pages.Count;
@@ -201,7 +204,7 @@ namespace ICSharpCode.Reporting.PageBuilder
 		
 		#region Visitors
 		
-		protected void SetupExpressionRunner (ReportSettings reportsettings,CollectionDataSource dataSource){
+		protected void SetupExpressionRunner (IReportSettings reportsettings,CollectionDataSource dataSource){
 			ExpressionRunner = new ExpressionRunner(Pages,reportsettings,dataSource);
 		}
 		

@@ -1,6 +1,6 @@
 # #develop (short for SharpDevelop) 
 
-##Overview
+## Overview
 
  #develop is a free Integrated Development Environment
 (IDE) for C#, VB.NET, Boo, IronPython, IronRuby and F# projects on Microsoft's
@@ -9,22 +9,19 @@ you would expect in an IDE plus a few more.
 
 The #develop project started on September 11th, 2000. The project was initiated
 by Mike Krüger. In the course of the project, several contributors joined in.
-If you want to contribute see ["Joining the team"](https://github.com/icsharpcode/SharpDevelop/wiki/Joining-the-Team).
 
-1. [Official Website](http://www.icsharpcode.net/OpenSource/SD/Default.aspx)
-2. [Forums](http://community.sharpdevelop.net/forums/)
-3. [Build Artefacts (Nightly Builds)](http://build.sharpdevelop.net/BuildArtefacts)
+Looking for the tech notes (Fine Art of Commenting, Coding Style Guide, and more)? These can be found as rtf files in [doc/technotes](https://github.com/icsharpcode/SharpDevelop/tree/master/doc/technotes)
 
-##How To Compile
+## How To Compile
  #Develop can be compiled using the supplied .bat files, or in #Develop itself.
 
-##System Requirements (running #Develop)
+## System Requirements (running #Develop)
 
  - Windows Vista or higher.
  - [.NET 4.5](http://www.microsoft.com/en-au/download/details.aspx?id=30653)
  - [Visual C++ 2008 SP1 Runtime](http://www.microsoft.com/downloads/details.aspx?familyid=A5C84275-3B97-4AB7-A40D-3802B2AF5FC2&displaylang=en)
 
-##Extended Requirements (building #Develop)
+## Extended Requirements (building #Develop)
 
  - [Microsoft Build Tools 2013](http://www.microsoft.com/en-us/download/details.aspx?id=40760)
  - [.NET 3.5 SP1](http://www.microsoft.com/en-au/download/details.aspx?id=22)
@@ -34,7 +31,7 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
  - [Windows PowerShell](http://www.microsoft.com/en-us/download/details.aspx?id=34595)
  - If you have cloned the SD git repository: git must be available on your PATH
  
-##Libraries and Integrated tools:
+## Libraries and Integrated tools:
 
 * [Avalon Dock](http://avalondock.codeplex.com/) : New BSD License (BSD) (thanks to **Adolfo Marinucci**)
 * [Graph#](https://graphsharp.codeplex.com/)
@@ -48,7 +45,7 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
 * [SQLite](https://sqlite.org/)
 * [WPFToolkit](https://wpf.codeplex.com/)
 
-##Integrated Tools (packaged with #Develop):
+## Integrated Tools (packaged with #Develop):
 
 * [IronPython](http://ironpython.net/)
 * [IronRuby](https://ironruby.codeplex.com/)
@@ -57,7 +54,7 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
 * [OpenCover](https://github.com/OpenCover/opencover)
 * [WiX](https://wix.codeplex.com/)
 
-##Reusable Libraries (Part of #Develop):
+## Reusable Libraries (Part of #Develop):
 
 * [AvalonEdit](http://avalonedit.net/)
 * [Debugger.Core](https://github.com/icsharpcode/SharpDevelop/tree/master/src/AddIns/Debugger/Debugger.Core)
@@ -69,7 +66,7 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
 
 ## #Develop Contributors
 
-###Developers
+### Developers
 
 * [Mike Krüger](https://github.com/mkrueger) (Project Founder)
 * [Daniel Grunwald](https://github.com/dgrunwald) (Technical Lead)
@@ -79,12 +76,12 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
 * [Siegfried Pammer](https://github.com/siegfriedpammer)
 * [Peter Forstmeier]( https://github.com/PeterForstmeier)(#Develop Reports)	
 
-###Non-Developers
+### Non-Developers
 
 * Christoph Wille (PM)
 * Bernhard Spuida (Kalfaktor)
 
-###Past Developers (Non-Exhaustive List)
+### Past Developers (Non-Exhaustive List)
 
 * [Mike Krüger](https://github.com/mkrueger) (Project Founder)
 * Alexandre Semenov
@@ -117,4 +114,4 @@ If you want to contribute see ["Joining the team"](https://github.com/icsharpcod
 * Tomasz Tretkowski
 * Troy Simpson
 
-######Copyright 2014 AlphaSierraPapa for the SharpDevelop team. SharpDevelop is distributed under the MIT license.
+###### Copyright 2014 AlphaSierraPapa for the SharpDevelop team. SharpDevelop is distributed under the MIT license.
